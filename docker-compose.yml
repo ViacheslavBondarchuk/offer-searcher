@@ -60,6 +60,23 @@ services:
       - TEAMCITY_CONTEXT=/teamcity
     links:
       - postgresql
+  teamcity-agent:
+    image: jetbrains/teamcity-agent:2023.11.1
+    container_name: teamcity-agent
+    restart: on-failure
+    cpu_count: 1
+    volumes:
+      - "/home/hserver/teamcity_agent/config:/data/teamcity_agent/conf"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/home/hserver/teamcity_agent/work:/opt/buildagent/work"
+      - "/home/hserver/teamcity_agent/temp:/opt/buildagent/temp"
+      - "/home/hserver/teamcity_agent/tools:/opt/buildagent/tools"
+      - "/home/hserver/teamcity_agent/plugins:/opt/buildagent/plugins"
+      - "/home/hserver/teamcity_agent/system:/opt/buildagent/system"
+    environment:
+      - SERVER_URL=http://teamcity:8111/teamcity
+    links:
+      - teamcity
   nginx:
     image: nginx:stable-alpine3.17
     container_name: nginx
