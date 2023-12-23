@@ -33,8 +33,8 @@ public final class EventKafkaConsumer extends AbstractKafkaTopicStatusAwareConsu
     @Override
     @KafkaListener(topics = "${com.gamesys.sportsbook.common.transport.kafka.topic.event}",
             idIsGroup = false, containerFactory = "kafkaListenerContainerFactory")
-    public void onRecords(List<ConsumerRecord<String, String>> consumerRecords, Acknowledgment acknowledgment) {
-        super.onRecords(consumerRecords, acknowledgment);
+    public void onRecords(List<ConsumerRecord<String, String>> consumerRecords) {
+        super.onRecords(consumerRecords);
     }
 
     @Override

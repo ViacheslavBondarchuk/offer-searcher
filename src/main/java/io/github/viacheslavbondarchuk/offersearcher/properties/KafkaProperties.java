@@ -101,8 +101,8 @@ public final class KafkaProperties {
         proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 1);
+        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 5000);
+        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 5000);
         proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, CommonUtil.groupIdWithTimestamp("offer-searcher"));
 
         if (SSL_PROTOCOL.equals(securityProtocol)) {
