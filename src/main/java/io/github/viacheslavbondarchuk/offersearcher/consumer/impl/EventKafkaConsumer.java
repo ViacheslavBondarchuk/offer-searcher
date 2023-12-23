@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,8 +33,8 @@ public final class EventKafkaConsumer extends AbstractKafkaTopicStatusAwareConsu
     @Override
     @KafkaListener(topics = "${com.gamesys.sportsbook.common.transport.kafka.topic.event}",
             idIsGroup = false, containerFactory = "kafkaListenerContainerFactory")
-    public void onRecords(List<ConsumerRecord<String, String>> consumerRecords) {
-        super.onRecords(consumerRecords);
+    public void onRecords(List<ConsumerRecord<String, String>> consumerRecords, Acknowledgment acknowledgment) {
+        super.onRecords(consumerRecords, acknowledgment);
     }
 
     @Override

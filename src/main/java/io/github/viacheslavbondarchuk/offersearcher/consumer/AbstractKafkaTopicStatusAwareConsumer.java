@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
+import org.springframework.kafka.support.Acknowledgment;
 
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ public abstract class AbstractKafkaTopicStatusAwareConsumer<K, V> implements Kaf
     }
 
     @Override
-    public void onRecords(List<ConsumerRecord<K, V>> records) {
+    public void onRecords(List<ConsumerRecord<K, V>> records, Acknowledgment acknowledgment) {
         for (ConsumerRecord<K, V> record : records) {
             try {
                 log.info("Processing kafka record. Key: {}, Value: {}", record.key(), record.value());
@@ -60,5 +61,6 @@ public abstract class AbstractKafkaTopicStatusAwareConsumer<K, V> implements Kaf
                 log.error("Can not process kafka record: Key: {}, Value: {}. Exception: ", record.key(), record.value(), ex);
             }
         }
+        acknowledgment.acknowledge();
     }
 }
