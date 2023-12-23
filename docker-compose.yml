@@ -5,6 +5,8 @@ services:
     container_name: portainer
     restart: on-failure
     cpu_count: 1
+    networks:
+      infra_network:
     environment:
       - VIRTUAL_HOST=io-operations.xyz
       - VIRTUAL_PORT=9443
@@ -17,6 +19,8 @@ services:
     container_name: vault
     restart: on-failure
     cpu_count: 1
+    networks:
+      infra_network:
     ports:
       - "8200:8200"
     cap_add:
@@ -32,6 +36,8 @@ services:
     container_name: mongodb
     restart: on-failure
     cpu_count: 4
+    networks:
+      infra_network:
     volumes:
       - "/home/hserver/mongodb/data:/bitnami/mongodb:rw"
     ports:
@@ -43,6 +49,8 @@ services:
     container_name: postgresql
     restart: on-failure
     cpu_count: 1
+    networks:
+      infra_network:
     volumes:
       - "/home/hserver/postgresql/data:/var/lib/postgresql/data:Z"
     env_file:
@@ -52,6 +60,8 @@ services:
     container_name: teamcity
     restart: on-failure
     cpu_count: 1
+    networks:
+      infra_network:
     volumes:
       - "/home/hserver/teamcity/data:/data/teamcity_server/datadir:Z"
       - "/home/hserver/teamcity/logs:/opt/teamcity/logs:Z"
@@ -64,7 +74,10 @@ services:
     image: jetbrains/teamcity-agent:2023.11.1
     container_name: teamcity-agent
     restart: on-failure
+    user: root
     cpu_count: 1
+    networks:
+      infra_network:
     volumes:
       - "/home/hserver/teamcity_agent/config:/data/teamcity_agent/conf"
       - "/var/run/docker.sock:/var/run/docker.sock"
@@ -82,6 +95,8 @@ services:
     container_name: nginx
     restart: on-failure
     cpu_count: 1
+    networks:
+      infra_network:
     volumes:
       - "/home/hserver/nginx/config/nginx.conf:/etc/nginx/nginx.conf:ro"
       - "/home/hserver/certbot/www/:/var/www/certbot:ro"
@@ -100,4 +115,9 @@ services:
 #      - "/home/hserver/certbot/conf/:/etc/letsencrypt/:rw"
 #    links:
 #      - nginx
+
+
+networks:
+  infra_network:
+    name: infra_network
 

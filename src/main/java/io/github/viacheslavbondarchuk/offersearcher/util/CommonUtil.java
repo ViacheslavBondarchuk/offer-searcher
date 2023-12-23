@@ -45,7 +45,7 @@ public final class CommonUtil {
     }
 
     public static String groupIdWithTimestamp(String groupName) {
-        return groupName.concat(String.valueOf(System.currentTimeMillis()));
+        return groupName.concat("-").concat(String.valueOf(System.currentTimeMillis()));
     }
 
     public static String generateHazelcastMapName(EntityType type, String brandId) {
