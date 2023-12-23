@@ -12,6 +12,8 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.CommonLoggingErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.util.backoff.BackOff;
 
 /**
  * author: vbondarchuk
@@ -39,7 +41,7 @@ public class KafkaConfiguration {
         kafkaListenerContainerFactory.setConsumerFactory(consumerFactory);
         kafkaListenerContainerFactory.setConcurrency(1);
         kafkaListenerContainerFactory.setBatchListener(true);
-        kafkaListenerContainerFactory.setCommonErrorHandler(new CommonLoggingErrorHandler());
+        kafkaListenerContainerFactory.setCommonErrorHandler(new DefaultErrorHandler());
         return kafkaListenerContainerFactory;
     }
 
