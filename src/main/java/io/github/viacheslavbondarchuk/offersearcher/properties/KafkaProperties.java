@@ -4,9 +4,11 @@ import io.github.viacheslavbondarchuk.offersearcher.service.JKSFileService;
 import io.github.viacheslavbondarchuk.offersearcher.util.CommonUtil;
 import lombok.Getter;
 import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -97,13 +99,16 @@ public final class KafkaProperties {
     public Map<String, Object> load(JKSFileService jksFileService) {
         Map<String, Object> proerties = new HashMap<>();
         proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
         proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 5000);
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 5000);
+        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);
+        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 500);
         proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, CommonUtil.groupIdWithTimestamp("offer-searcher"));
+        proerties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 500);
+        proerties.put(ConsumerConfig.ALLOW_AUTO_CREATE_TOPICS_CONFIG, false);
+        proerties.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, 5000);
 
         if (SSL_PROTOCOL.equals(securityProtocol)) {
             proerties.put(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, securityProtocol);

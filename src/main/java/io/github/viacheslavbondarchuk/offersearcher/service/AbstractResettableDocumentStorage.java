@@ -2,7 +2,8 @@ package io.github.viacheslavbondarchuk.offersearcher.service;
 
 import io.github.viacheslavbondarchuk.offersearcher.domain.SearchRequest;
 import io.github.viacheslavbondarchuk.offersearcher.domain.SearchResult;
-import lombok.RequiredArgsConstructor;
+import io.github.viacheslavbondarchuk.offersearcher.domain.StorageStatus;
+import io.github.viacheslavbondarchuk.offersearcher.util.KeyValuePair;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -15,16 +16,29 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@RequiredArgsConstructor
-public abstract class AbstractDocumentStorage<ID, T, D extends Document> {
-    private static final SearchResult<List<Document>> EMPTY_RESULT = SearchResult.of(0L, Collections.emptyList());
+public abstract class AbstractResettableDocumentStorage<ID, T, D extends Document> implements StatusAwareService<StorageStatus> {
     private static final String MONGO_ID_KEY = "_id";
+    private static final Query COUNT_QUERY = Query.query(Criteria.where(MONGO_ID_KEY).exists(true));
 
     protected final MongoTemplate mongoTemplate;
+    protected final String collectionName;
 
-    protected abstract String getCollectionName();
+    protected AbstractResettableDocumentStorage(MongoTemplate mongoTemplate, String collectionName) {
+        this.mongoTemplate = mongoTemplate;
+        this.collectionName = collectionName;
+        mongoTemplate.dropCollection(collectionName);
+    }
 
     protected abstract D convert(T entity);
+
+    protected String getCollectionName() {
+        return collectionName;
+    }
+
+    @Override
+    public KeyValuePair<String, StorageStatus> getStatus() {
+        return KeyValuePair.of(getServiceName(), StorageStatus.of(getCollectionName(), mongoTemplate.count(COUNT_QUERY, getCollectionName())));
+    }
 
     public void save(ID id, T entity) {
         try {
@@ -56,16 +70,10 @@ public abstract class AbstractDocumentStorage<ID, T, D extends Document> {
     }
 
     public SearchResult<List<Document>> find(SearchRequest request) {
-        SearchResult<List<Document>> result = null;
-        try {
-            result = SearchResult.of(
-                    mongoTemplate.count(new BasicQuery(request.getQuery()), Document.class, getCollectionName()),
-                    mongoTemplate.find(getSearchQuery(request), Document.class, getCollectionName())
-            );
-        } catch (Exception ex) {
-            log.error("Can not find documents into collection: {}. Exception: ", getCollectionName(), ex);
-        }
-        return result == null ? EMPTY_RESULT : result;
+        return SearchResult.of(
+                mongoTemplate.count(new BasicQuery(request.getQuery()), Document.class, getCollectionName()),
+                mongoTemplate.find(getSearchQuery(request), Document.class, getCollectionName())
+        );
     }
 
     private static BasicQuery getSearchQuery(SearchRequest request) {

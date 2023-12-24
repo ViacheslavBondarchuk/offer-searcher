@@ -1,7 +1,9 @@
-package io.github.viacheslavbondarchuk.offersearcher.web;
+package io.github.viacheslavbondarchuk.offersearcher.controller;
 
+import io.github.viacheslavbondarchuk.offersearcher.service.AuthorizationService;
 import io.github.viacheslavbondarchuk.offersearcher.service.StatusAwareService;
 import io.github.viacheslavbondarchuk.offersearcher.util.KeyValuePair;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,14 +15,16 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("status")
 @SuppressWarnings({"rawtypes"})
-public class StatusController {
+public class StatusController implements WebController {
     private final List<StatusAwareService> services;
+    private final AuthorizationService authorizationService;
 
     @GetMapping
-    public List<KeyValuePair> getStatus() {
-        return services.stream()
+    public List<KeyValuePair> getStatus(HttpServletRequest request) {
+        return authorizationService.proceed(request, () -> services.stream()
                 .map(StatusAwareService::getStatus)
-                .toList();
+                .toList());
     }
+
 
 }

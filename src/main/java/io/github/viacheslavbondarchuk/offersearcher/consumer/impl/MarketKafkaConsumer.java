@@ -1,13 +1,12 @@
 package io.github.viacheslavbondarchuk.offersearcher.consumer.impl;
 
 import io.github.viacheslavbondarchuk.offersearcher.consumer.AbstractKafkaTopicStatusAwareConsumer;
-import io.github.viacheslavbondarchuk.offersearcher.service.MarketDocumentStorage;
+import io.github.viacheslavbondarchuk.offersearcher.service.MarketResettableDocumentStorage;
 import io.github.viacheslavbondarchuk.offersearcher.util.CommonUtil;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,11 +15,11 @@ import java.util.Optional;
 
 @Service
 public final class MarketKafkaConsumer extends AbstractKafkaTopicStatusAwareConsumer<String, String> {
-    private final MarketDocumentStorage storage;
+    private final MarketResettableDocumentStorage storage;
 
     public MarketKafkaConsumer(@Value("${com.gamesys.sportsbook.common.transport.kafka.topic.market}") String topic,
                                Consumer<String, String> consumer,
-                               MarketDocumentStorage storage) {
+                               MarketResettableDocumentStorage storage) {
         super(consumer, topic);
         this.storage = storage;
     }
@@ -32,7 +31,7 @@ public final class MarketKafkaConsumer extends AbstractKafkaTopicStatusAwareCons
 
     @Override
     @KafkaListener(topics = "${com.gamesys.sportsbook.common.transport.kafka.topic.market}",
-            idIsGroup = false, containerFactory = "kafkaListenerContainerFactory")
+            idIsGroup = false, containerFactory = "kafkaListenerContainerFactory", errorHandler = "kafkaListenerErrorHandler")
     public void onRecords(List<ConsumerRecord<String, String>> consumerRecords) {
         super.onRecords(consumerRecords);
     }

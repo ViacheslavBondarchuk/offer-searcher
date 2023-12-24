@@ -53,7 +53,7 @@ public abstract class AbstractKafkaTopicStatusAwareConsumer<K, V> implements Kaf
     public void onRecords(List<ConsumerRecord<K, V>> records) {
         for (ConsumerRecord<K, V> record : records) {
             try {
-                log.info("Processing kafka record. Key: {}, Value: {}", record.key(), record.value());
+                log.debug("Processing kafka record. Key: {}, Value: {}", record.key(), record.value());
                 updateCurrentOffset(record.offset());
                 onRecord(record);
             } catch (Exception ex) {

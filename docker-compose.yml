@@ -90,6 +90,15 @@ services:
       - SERVER_URL=http://teamcity:8111/teamcity
     links:
       - teamcity
+  hazelcast:
+    image: hazelcast/hazelcast:5
+    container_name: hazelcast
+    restart: on-failure
+    cpu_count: 1
+    ports:
+      - "5701:5701"
+    networks:
+      infra_network:
   nginx:
     image: nginx:stable-alpine3.17
     container_name: nginx

@@ -1,6 +1,5 @@
 package io.github.viacheslavbondarchuk.offersearcher.util;
 
-import io.github.viacheslavbondarchuk.offersearcher.domain.EntityType;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 
@@ -11,6 +10,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * author: vbondarchuk
@@ -46,10 +46,6 @@ public final class CommonUtil {
 
     public static String groupIdWithTimestamp(String groupName) {
         return groupName.concat("-").concat(String.valueOf(System.currentTimeMillis()));
-    }
-
-    public static String generateHazelcastMapName(EntityType type, String brandId) {
-        return type.getValue().concat("_").concat(brandId.replaceAll("-", "_"));
     }
 
     public static <T> void acceptByPredicate(T value, Predicate<T> predicate, Consumer<T> consumer, Runnable orElse) {

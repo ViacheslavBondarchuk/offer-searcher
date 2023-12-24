@@ -1,10 +1,13 @@
 package io.github.viacheslavbondarchuk.offersearcher.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.util.Base64;
 
+@Slf4j
 public final class JKSUtil {
     private static final String JKS_KEY_STORE = "JKS";
 
@@ -18,7 +21,7 @@ public final class JKSUtil {
             keyStore.load(new ByteArrayInputStream(bytes), password);
             keyStore.store(outputStream, password);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Can not load file: ", e);
         }
         return filePath;
     }
