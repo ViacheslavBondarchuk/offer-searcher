@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 
 import static io.github.viacheslavbondarchuk.offersearcher.constants.Headers.SECRET_KEY;
 import static io.github.viacheslavbondarchuk.offersearcher.constants.Headers.SESSION_TOKEN;
+import static io.github.viacheslavbondarchuk.offersearcher.constants.Headers.X_REAL_IP;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Service
@@ -32,8 +33,11 @@ public class AuthorizationService {
 
     public String authorize(HttpServletRequest request) {
         String secretKeyHeader = request.getHeader(SECRET_KEY);
+        String xRealIpHeader = request.getHeader(X_REAL_IP);
         Checking.check(secretKeyHeader, Objects::isNull, () ->
                 new AuthorizationException(MessageFormat.format("Authorization exception. {0} header is absent", SECRET_KEY)));
+        Checking.check(xRealIpHeader, Objects::isNull, () ->
+                new AuthorizationException(MessageFormat.format("Authorization exception. {0} header is absent", X_REAL_IP)));
         Checking.check(secretKeyHeader, Predicate.not(secretKey::equals), () -> new AuthorizationException("Authorization exception"));
 
         long issueAt = System.currentTimeMillis();
@@ -45,7 +49,10 @@ public class AuthorizationService {
 
     public <T> T proceed(HttpServletRequest request, Supplier<T> supplier) {
         String sessionToken = request.getHeader(SESSION_TOKEN);
+        String xRealIpHeader = request.getHeader(X_REAL_IP);
         Checking.check(sessionToken, Predicate.not(hazelcastSessionMap::containsKey), () -> new AuthorizationException("Unauthorized"));
+        Checking.check(xRealIpHeader, Objects::isNull, () ->
+                new AuthorizationException(MessageFormat.format("Authorization exception. {0} header is absent", X_REAL_IP)));
         HazelcastSession hazelcastSession = hazelcastSessionMap.get(sessionToken);
         hazelcastSessionMap.put(sessionToken, new HazelcastSession(request.getRemoteAddr(),
                 hazelcastSession.getIssueAt(), System.currentTimeMillis() + MINUTES.toMillis(30)), 30, MINUTES);
