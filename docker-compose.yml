@@ -3,7 +3,7 @@ services:
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
-    restart: on-failure
+    restart: always
     cpu_count: 1
     networks:
       infra_network:
@@ -17,7 +17,7 @@ services:
   vault:
     image: hashicorp/vault
     container_name: vault
-    restart: on-failure
+    restart: always
     cpu_count: 1
     networks:
       infra_network:
@@ -34,7 +34,7 @@ services:
   mongodb:
     image: bitnami/mongodb:7.0.4
     container_name: mongodb
-    restart: on-failure
+    restart: always
     cpu_count: 4
     networks:
       infra_network:
@@ -47,7 +47,7 @@ services:
   postgresql:
     image: postgres:16.1-alpine3.19
     container_name: postgresql
-    restart: on-failure
+    restart: always
     cpu_count: 1
     networks:
       infra_network:
@@ -58,7 +58,7 @@ services:
   teamcity:
     image: jetbrains/teamcity-server:2023.11.1-linux
     container_name: teamcity
-    restart: on-failure
+    restart: always
     cpu_count: 1
     networks:
       infra_network:
@@ -73,7 +73,7 @@ services:
   teamcity-agent:
     image: jetbrains/teamcity-agent:2023.11.1
     container_name: teamcity-agent
-    restart: on-failure
+    restart: always
     user: root
     cpu_count: 1
     networks:
@@ -93,7 +93,7 @@ services:
   hazelcast:
     image: hazelcast/hazelcast:5
     container_name: hazelcast
-    restart: on-failure
+    restart: always
     cpu_count: 1
     ports:
       - "5701:5701"
@@ -102,7 +102,7 @@ services:
   nginx:
     image: nginx:stable-alpine3.17
     container_name: nginx
-    restart: on-failure
+    restart: always
     cpu_count: 1
     networks:
       infra_network:
@@ -118,7 +118,7 @@ services:
       - teamcity
 #  certbot:
 #    image: certbot/certbot:amd64-latest
-#    restart: on-failure
+#    restart: always
 #    volumes:
 #      - "/home/hserver/certbot/www/:/var/www/certbot/:rw"
 #      - "/home/hserver/certbot/conf/:/etc/letsencrypt/:rw"
