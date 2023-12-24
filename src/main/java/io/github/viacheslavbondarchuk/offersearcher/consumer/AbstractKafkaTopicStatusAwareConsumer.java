@@ -1,5 +1,6 @@
 package io.github.viacheslavbondarchuk.offersearcher.consumer;
 
+import io.github.viacheslavbondarchuk.offersearcher.domain.KafkaTopicPartitionStatus;
 import io.github.viacheslavbondarchuk.offersearcher.domain.KafkaTopicStatus;
 import io.github.viacheslavbondarchuk.offersearcher.service.StatusAwareService;
 import io.github.viacheslavbondarchuk.offersearcher.util.KeyValuePair;
@@ -8,45 +9,58 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static java.lang.Long.max;
+import java.util.Optional;
 
 @Slf4j
 public abstract class AbstractKafkaTopicStatusAwareConsumer<K, V> implements KafkaConsumer<K, V>, StatusAwareService<KafkaTopicStatus> {
-    protected final KeyValuePair<String, Long> topicMaxOffsetPair;
-    protected final KeyValuePair<String, Long> topicCurrentOffsetPair;
+    protected final Map<TopicPartition, Long> topicMaxOffsetPair;
+    protected final Map<TopicPartition, Long> topicCurrentOffsetPair;
+    protected final Consumer<K, V> consumer;
     protected final String topic;
 
-    protected AbstractKafkaTopicStatusAwareConsumer(Consumer<String, String> consumer, String topic) {
-        this.topicMaxOffsetPair = KeyValuePair.of(topic, consumer.endOffsets(consumer.listTopics()
+    protected AbstractKafkaTopicStatusAwareConsumer(Consumer<K, V> consumer, String topic) {
+        this.consumer = consumer;
+        this.topicMaxOffsetPair = new HashMap<>();
+        this.topicCurrentOffsetPair = new HashMap<>();
+        this.topic = topic;
+        this.init();
+    }
+
+    private void init() {
+        consumer.endOffsets(
+                consumer.listTopics()
                         .entrySet()
                         .stream()
                         .filter(entry -> Objects.equals(entry.getKey(), topic))
                         .map(Map.Entry::getValue)
                         .flatMap(List::stream)
                         .map(partitionInfo -> new TopicPartition(partitionInfo.topic(), partitionInfo.partition()))
-                        .toList()).values()
-                .stream()
-                .reduce(0L, Long::sum) - 1);
-        this.topicCurrentOffsetPair = KeyValuePair.of(topic, 0L);
-        this.topic = topic;
+                        .toList()).forEach((partition, offset) -> topicMaxOffsetPair.put(partition, offset - 1)
+        );
     }
 
     @Override
     public KeyValuePair<String, KafkaTopicStatus> getStatus() {
-        return KeyValuePair.of(getServiceName(), KafkaTopicStatus.of(topic, topicMaxOffsetPair.getValue(), topicCurrentOffsetPair.getValue()));
+        Map<TopicPartition, KafkaTopicPartitionStatus> partitionStatusMap = new HashMap<>();
+        topicMaxOffsetPair.forEach((partition, offset) ->
+                partitionStatusMap.put(partition, new KafkaTopicPartitionStatus(offset,
+                        Optional.ofNullable(topicCurrentOffsetPair.get(partition)).orElse(0L))));
+        return KeyValuePair.of(getServiceName(), KafkaTopicStatus.of(topic, isReady(), partitionStatusMap));
     }
 
     @Override
     public boolean isReady() {
-        return max(topicMaxOffsetPair.getValue() - topicCurrentOffsetPair.getValue(), 0L) <= 0;
+        return topicMaxOffsetPair.entrySet().stream()
+                .map(entry -> entry.getValue() - Optional.ofNullable(topicCurrentOffsetPair.get(entry.getKey())).orElse(0L))
+                .reduce(0L, Long::sum) <= 0;
     }
 
-    protected void updateCurrentOffset(long offset) {
-        topicCurrentOffsetPair.updateValue(offset);
+    protected void updateCurrentOffset(String topic, int partition, Long offset) {
+        topicCurrentOffsetPair.put(new TopicPartition(topic, partition), offset);
     }
 
     @Override
@@ -54,7 +68,7 @@ public abstract class AbstractKafkaTopicStatusAwareConsumer<K, V> implements Kaf
         for (ConsumerRecord<K, V> record : records) {
             try {
                 log.debug("Processing kafka record. Key: {}, Value: {}", record.key(), record.value());
-                updateCurrentOffset(record.offset());
+                updateCurrentOffset(record.topic(), record.partition(), record.offset());
                 onRecord(record);
             } catch (Exception ex) {
                 log.error("Can not process kafka record: Key: {}, Value: {}. Exception: ", record.key(), record.value(), ex);

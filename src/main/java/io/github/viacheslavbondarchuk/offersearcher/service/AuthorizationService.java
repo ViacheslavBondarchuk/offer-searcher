@@ -22,6 +22,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Service
 public class AuthorizationService {
+    public static final String AUTHORIZATION_EXCEPTION_TEMPLATE = "Authorization exception. {0} header is absent";
     private final IMap<String, HazelcastSession> hazelcastSessionMap;
     private final String secretKey;
 
@@ -34,12 +35,9 @@ public class AuthorizationService {
     public String authorize(HttpServletRequest request) {
         String secretKeyHeader = request.getHeader(SECRET_KEY);
         String xRealIpHeader = request.getHeader(X_REAL_IP);
-        Checking.check(secretKeyHeader, Objects::isNull, () ->
-                new AuthorizationException(MessageFormat.format("Authorization exception. {0} header is absent", SECRET_KEY)));
-        Checking.check(xRealIpHeader, Objects::isNull, () ->
-                new AuthorizationException(MessageFormat.format("Authorization exception. {0} header is absent", X_REAL_IP)));
+        Checking.check(secretKeyHeader, Objects::isNull, () -> new AuthorizationException(MessageFormat.format(AUTHORIZATION_EXCEPTION_TEMPLATE, SECRET_KEY)));
+        Checking.check(xRealIpHeader, Objects::isNull, () -> new AuthorizationException(MessageFormat.format(AUTHORIZATION_EXCEPTION_TEMPLATE, X_REAL_IP)));
         Checking.check(secretKeyHeader, Predicate.not(secretKey::equals), () -> new AuthorizationException("Authorization exception"));
-
         long issueAt = System.currentTimeMillis();
         HazelcastSession hazelcastSession = new HazelcastSession(request.getRemoteAddr(), issueAt, issueAt + MINUTES.toMillis(30));
         String sessionToken = TokenGenerator.generate(hazelcastSession);
@@ -50,9 +48,9 @@ public class AuthorizationService {
     public <T> T proceed(HttpServletRequest request, Supplier<T> supplier) {
         String sessionToken = request.getHeader(SESSION_TOKEN);
         String xRealIpHeader = request.getHeader(X_REAL_IP);
+        Checking.check(sessionToken, Objects::isNull, () ->  new AuthorizationException("Unauthorized"));
+        Checking.check(xRealIpHeader, Objects::isNull, () -> new AuthorizationException(MessageFormat.format(AUTHORIZATION_EXCEPTION_TEMPLATE, X_REAL_IP)));
         Checking.check(sessionToken, Predicate.not(hazelcastSessionMap::containsKey), () -> new AuthorizationException("Unauthorized"));
-        Checking.check(xRealIpHeader, Objects::isNull, () ->
-                new AuthorizationException(MessageFormat.format("Authorization exception. {0} header is absent", X_REAL_IP)));
         HazelcastSession hazelcastSession = hazelcastSessionMap.get(sessionToken);
         hazelcastSessionMap.put(sessionToken, new HazelcastSession(request.getRemoteAddr(),
                 hazelcastSession.getIssueAt(), System.currentTimeMillis() + MINUTES.toMillis(30)), 30, MINUTES);
