@@ -11,13 +11,13 @@ import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 public abstract class AbstractResettableDocumentStorage<ID, T, D extends Document> implements StatusAwareService<StorageStatus> {
     private static final String MONGO_ID_KEY = "_id";
+    private static final String ENTITY_ID_KEY = "id";
     private static final Query COUNT_QUERY = Query.query(Criteria.where(MONGO_ID_KEY).exists(true));
 
     protected final MongoTemplate mongoTemplate;
@@ -44,6 +44,7 @@ public abstract class AbstractResettableDocumentStorage<ID, T, D extends Documen
         try {
             D document = convert(entity);
             document.append(MONGO_ID_KEY, id);
+            document.remove(ENTITY_ID_KEY);
             mongoTemplate.save(document, getCollectionName());
         } catch (Exception ex) {
             log.error("Can not save into collection: {}, entity: {}. Exception: ", getCollectionName(), entity, ex);
@@ -54,6 +55,7 @@ public abstract class AbstractResettableDocumentStorage<ID, T, D extends Documen
         try {
             D document = convert(entity);
             document.append(MONGO_ID_KEY, id);
+            document.remove(ENTITY_ID_KEY);
             additionalData.forEach(document::append);
             mongoTemplate.save(document, getCollectionName());
         } catch (Exception ex) {
@@ -81,6 +83,7 @@ public abstract class AbstractResettableDocumentStorage<ID, T, D extends Documen
         query.skip(request.getSkip());
         query.limit(request.getLimit());
         query.setSortObject(request.getSort());
+        query.setFieldsObject(request.getFields());
         return query;
     }
 }
