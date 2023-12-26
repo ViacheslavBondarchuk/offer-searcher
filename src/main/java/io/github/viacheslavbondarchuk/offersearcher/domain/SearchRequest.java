@@ -25,7 +25,7 @@ public class SearchRequest {
                          @JsonProperty Integer limit) {
         this.query = query;
         this.sort = sort == null ? new Document() : sort;
-        this.fields = fields;
+        this.fields = fields == null ? new Document() : fields;
         this.type = type;
         this.skip = skip == null ? 0 : skip;
         this.limit = limit == null ? 10 : limit;
