@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 @Getter
 @ConfigurationProperties("mongodb")
-public class MongoProperties {
+public final class MongoProperties {
     private final String username;
     private final char[] password;
     private final String database;
@@ -34,12 +34,18 @@ public class MongoProperties {
         private final String event;
         private final String market;
         private final String selection;
+        private final String eventUpdates;
+        private final String marketUpdates;
+        private final String selectionUpdates;
 
         @ConstructorBinding
-        public Collection(String event, String market, String selection) {
+        public Collection(String event, String market, String selection, String eventUpdates, String marketUpdates, String selectionUpdates) {
             this.event = event;
             this.market = market;
             this.selection = selection;
+            this.eventUpdates = eventUpdates;
+            this.marketUpdates = marketUpdates;
+            this.selectionUpdates = selectionUpdates;
         }
     }
 }

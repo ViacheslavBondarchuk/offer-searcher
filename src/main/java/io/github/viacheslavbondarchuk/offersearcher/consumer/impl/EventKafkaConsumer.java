@@ -1,8 +1,8 @@
 package io.github.viacheslavbondarchuk.offersearcher.consumer.impl;
 
-import io.github.viacheslavbondarchuk.offersearcher.consumer.AbstractKafkaTopicStatusAwareConsumer;
-import io.github.viacheslavbondarchuk.offersearcher.service.EventResettableDocumentStorage;
-import io.github.viacheslavbondarchuk.offersearcher.util.CommonUtil;
+import io.github.viacheslavbondarchuk.offersearcher.consumer.AbstractRecordKeepingConsumer;
+import io.github.viacheslavbondarchuk.offersearcher.service.EventStorage;
+import io.github.viacheslavbondarchuk.offersearcher.service.EventUpdateStorage;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,18 +10,13 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
-public final class EventKafkaConsumer extends AbstractKafkaTopicStatusAwareConsumer<String, String> {
-    private final EventResettableDocumentStorage storage;
+public final class EventKafkaConsumer extends AbstractRecordKeepingConsumer {
 
     public EventKafkaConsumer(@Value("${com.gamesys.sportsbook.common.transport.kafka.topic.event}") String topic,
-                              Consumer<String, String> consumer,
-                              EventResettableDocumentStorage storage) {
-        super(consumer, topic);
-        this.storage = storage;
+                              Consumer<String, String> consumer, EventStorage eventStorage, EventUpdateStorage eventUpdatesStorage) {
+        super(consumer, topic, eventUpdatesStorage, eventStorage);
     }
 
     @Override
@@ -36,10 +31,4 @@ public final class EventKafkaConsumer extends AbstractKafkaTopicStatusAwareConsu
         super.onRecords(consumerRecords);
     }
 
-    @Override
-    public void onRecord(ConsumerRecord<String, String> record) {
-        Optional.ofNullable(record.value())
-                .ifPresentOrElse(value -> storage.save(record.key(), value, Map.of("headers", CommonUtil.convertHeadersToMap(record.headers()))),
-                        () -> storage.remove(record.key()));
-    }
 }

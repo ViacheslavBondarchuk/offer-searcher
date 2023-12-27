@@ -21,9 +21,10 @@ public class StatusController implements WebController {
 
     @GetMapping
     public List<KeyValuePair> getStatus(HttpServletRequest request) {
-        return authorizationService.proceed(request, () -> services.stream()
+        authorizationService.check(request);
+        return services.stream()
                 .map(StatusAwareService::getStatus)
-                .toList());
+                .toList();
     }
 
 

@@ -1,8 +1,8 @@
 package io.github.viacheslavbondarchuk.offersearcher.consumer.impl;
 
-import io.github.viacheslavbondarchuk.offersearcher.consumer.AbstractKafkaTopicStatusAwareConsumer;
-import io.github.viacheslavbondarchuk.offersearcher.service.SelectionResettableDocumentStorage;
-import io.github.viacheslavbondarchuk.offersearcher.util.CommonUtil;
+import io.github.viacheslavbondarchuk.offersearcher.consumer.AbstractRecordKeepingConsumer;
+import io.github.viacheslavbondarchuk.offersearcher.service.SelectionStorage;
+import io.github.viacheslavbondarchuk.offersearcher.service.SelectionUpdateStorage;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,17 +10,13 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
-public final class SelectionKafkaConsumer extends AbstractKafkaTopicStatusAwareConsumer<String, String> {
-    private final SelectionResettableDocumentStorage storage;
+public final class SelectionKafkaConsumer extends AbstractRecordKeepingConsumer {
 
     public SelectionKafkaConsumer(@Value("${com.gamesys.sportsbook.common.transport.kafka.topic.selection}") String topic,
-                                  Consumer<String, String> consumer, SelectionResettableDocumentStorage storage) {
-        super(consumer, topic);
-        this.storage = storage;
+                                  Consumer<String, String> consumer, SelectionStorage selectionStorage, SelectionUpdateStorage updateStorage) {
+        super(consumer, topic, updateStorage, selectionStorage);
     }
 
     @Override
@@ -35,10 +31,4 @@ public final class SelectionKafkaConsumer extends AbstractKafkaTopicStatusAwareC
         super.onRecords(consumerRecords);
     }
 
-    @Override
-    public void onRecord(ConsumerRecord<String, String> record) {
-        Optional.ofNullable(record.value())
-                .ifPresentOrElse(value -> storage.save(record.key(), value, Map.of("headers", CommonUtil.convertHeadersToMap(record.headers()))),
-                        () -> storage.remove(record.key()));
-    }
 }

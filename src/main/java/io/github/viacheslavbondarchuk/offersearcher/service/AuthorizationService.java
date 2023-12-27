@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static io.github.viacheslavbondarchuk.offersearcher.constants.Headers.SECRET_KEY;
 import static io.github.viacheslavbondarchuk.offersearcher.constants.Headers.SESSION_TOKEN;
@@ -45,7 +44,7 @@ public class AuthorizationService {
         return sessionToken;
     }
 
-    public <T> T proceed(HttpServletRequest request, Supplier<T> supplier) {
+    public void check(HttpServletRequest request) {
         String sessionToken = request.getHeader(SESSION_TOKEN);
         String xRealIpHeader = request.getHeader(X_REAL_IP);
         Checking.check(sessionToken, Objects::isNull, () ->  new AuthorizationException("Unauthorized"));
@@ -54,7 +53,6 @@ public class AuthorizationService {
         HazelcastSession hazelcastSession = hazelcastSessionMap.get(sessionToken);
         hazelcastSessionMap.put(sessionToken, new HazelcastSession(request.getRemoteAddr(),
                 hazelcastSession.getIssueAt(), System.currentTimeMillis() + MINUTES.toMillis(30)), 30, MINUTES);
-        return supplier.get();
     }
 
 }

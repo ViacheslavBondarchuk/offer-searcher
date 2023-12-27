@@ -16,13 +16,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
-public abstract class AbstractKafkaTopicStatusAwareConsumer<K, V> implements KafkaConsumer<K, V>, StatusAwareService<KafkaTopicStatus> {
+public abstract class AbstractStatusAwareRawDataConsumer implements RawDataKafkaConsumer, StatusAwareService<KafkaTopicStatus> {
     protected final Map<TopicPartition, Long> topicMaxOffsetPair;
     protected final Map<TopicPartition, Long> topicCurrentOffsetPair;
-    protected final Consumer<K, V> consumer;
+    protected final Consumer<String, String> consumer;
     protected final String topic;
 
-    protected AbstractKafkaTopicStatusAwareConsumer(Consumer<K, V> consumer, String topic) {
+    protected AbstractStatusAwareRawDataConsumer(Consumer<String, String> consumer, String topic) {
         this.consumer = consumer;
         this.topicMaxOffsetPair = new HashMap<>();
         this.topicCurrentOffsetPair = new HashMap<>();
@@ -64,8 +64,8 @@ public abstract class AbstractKafkaTopicStatusAwareConsumer<K, V> implements Kaf
     }
 
     @Override
-    public void onRecords(List<ConsumerRecord<K, V>> records) {
-        for (ConsumerRecord<K, V> record : records) {
+    public void onRecords(List<ConsumerRecord<String, String>> records) {
+        for (ConsumerRecord<String, String> record : records) {
             try {
                 log.debug("Processing kafka record. Key: {}, Value: {}", record.key(), record.value());
                 updateCurrentOffset(record.topic(), record.partition(), record.offset());

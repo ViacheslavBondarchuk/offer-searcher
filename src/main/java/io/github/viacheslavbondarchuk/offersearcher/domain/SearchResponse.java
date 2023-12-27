@@ -14,11 +14,13 @@ public final class SearchResponse<T> {
     private final Long hits;
     private final Integer skip;
     private final Integer limit;
+    private final String brandId;
 
-    public SearchResponse(T data, Long hits, Integer skip, Integer limit) {
+    public SearchResponse(T data, Long hits, Integer skip, Integer limit, String brandId) {
         this.data = data;
         this.hits = hits;
         this.skip = skip;
         this.limit = limit;
+        this.brandId = brandId;
     }
 }
