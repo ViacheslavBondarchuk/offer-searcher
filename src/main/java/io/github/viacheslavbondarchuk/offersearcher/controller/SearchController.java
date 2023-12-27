@@ -28,7 +28,7 @@ public class SearchController implements WebController {
     public SearchResponse<List<Document>> search(@RequestBody SearchRequest searchRequest, HttpServletRequest request) {
         authorizationService.check(request);
         Checking.check(searchRequest.getLimit(), limit -> limit > 100,
-                () -> new BoundaryLimitException("Boundary limit exception. Boundary allowable limit is 100"));
+                () -> new BoundaryLimitException("Boundary limit exceeded. Boundary allowable limit is 100"));
         return searchService.search(searchRequest);
     }
 
@@ -36,7 +36,7 @@ public class SearchController implements WebController {
     public SearchResponse<List<Document>> searchUpdates(@RequestBody SearchRequest searchRequest, HttpServletRequest request) {
         authorizationService.check(request);
         Checking.check(searchRequest.getLimit(), limit -> limit > 100,
-                () -> new BoundaryLimitException("Boundary limit exception. Boundary allowable limit is 100"));
+                () -> new BoundaryLimitException("Boundary limit exceeded. Boundary allowable limit is 100"));
         return searchService.searchUpdates(searchRequest);
     }
 
