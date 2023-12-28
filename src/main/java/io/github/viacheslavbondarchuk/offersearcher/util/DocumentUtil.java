@@ -6,6 +6,8 @@ import org.bson.Document;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.github.viacheslavbondarchuk.offersearcher.domain.OperationType.REMOVE;
+import static io.github.viacheslavbondarchuk.offersearcher.domain.OperationType.UPDATE;
 import static io.github.viacheslavbondarchuk.offersearcher.service.AbstractDocumentStorage.ENTITY_ID_KEY;
 import static io.github.viacheslavbondarchuk.offersearcher.service.AbstractDocumentStorage.MONGO_ID_KEY;
 
@@ -15,6 +17,7 @@ public final class DocumentUtil {
     public static final String PARTITION_KEY = "partition";
     public static final String SYSTEM_DATA_KEY = "systemData";
     public static final String OFFSET_KEY = "offset";
+    public static final String OPERATION_TYPE_KEY = "operationType";
 
     private DocumentUtil() {}
 
@@ -30,7 +33,8 @@ public final class DocumentUtil {
         document.append(SYSTEM_DATA_KEY, Map.of(
                 TIMESTAMP_KEY, System.nanoTime(),
                 OFFSET_KEY, record.offset(),
-                PARTITION_KEY, record.partition()
+                PARTITION_KEY, record.partition(),
+                OPERATION_TYPE_KEY, record.value() == null ? REMOVE : UPDATE
         ));
         Optional.ofNullable(id).ifPresent(i -> document.append(MONGO_ID_KEY, id));
         return document;
