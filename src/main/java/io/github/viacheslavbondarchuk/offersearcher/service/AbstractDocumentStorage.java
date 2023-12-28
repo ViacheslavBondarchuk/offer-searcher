@@ -6,6 +6,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -16,7 +17,7 @@ public abstract class AbstractDocumentStorage implements StatusAwareService<Stor
 
     public static final String MONGO_ID_KEY = "_id";
     public static final String ENTITY_ID_KEY = "id";
-    public static final Query COUNT_QUERY = Query.query(Criteria.where(MONGO_ID_KEY).exists(true));
+    public static final Query COUNT_QUERY = new BasicQuery("{}");
 
     protected final MongoTemplate mongoTemplate;
     protected final String collectionName;
