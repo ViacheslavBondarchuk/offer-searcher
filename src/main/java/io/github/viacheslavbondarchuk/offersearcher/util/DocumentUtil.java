@@ -3,6 +3,7 @@ package io.github.viacheslavbondarchuk.offersearcher.util;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.bson.Document;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ public final class DocumentUtil {
     public static final String HEADERS_KEY = "headers";
     public static final String TIMESTAMP_KEY = "timestamp";
     public static final String TIMESTAMP_TYPE_KEY = "timestampType";
+    public static final String DATE_KEY = "date";
     public static final String PARTITION_KEY = "partition";
     public static final String SYSTEM_DATA_KEY = "systemData";
     public static final String OFFSET_KEY = "offset";
@@ -34,6 +36,7 @@ public final class DocumentUtil {
         document.append(SYSTEM_DATA_KEY, Map.of(
                 TIMESTAMP_KEY, record.timestamp(),
                 TIMESTAMP_TYPE_KEY, record.timestampType(),
+                DATE_KEY, new Date(record.timestamp()),
                 OFFSET_KEY, record.offset(),
                 PARTITION_KEY, record.partition(),
                 OPERATION_TYPE_KEY, record.value() == null ? REMOVE : UPDATE
