@@ -16,7 +16,13 @@ public class AuthorizationController implements WebController {
 
     @GetMapping
     public AuthorizationResponse authorize(HttpServletRequest request) {
-        return AuthorizationResponse.of(authorizationService.authorize(request));
+        return AuthorizationResponse.success(authorizationService.authorize(request));
+    }
+
+    @GetMapping("/check")
+    public AuthorizationResponse check(HttpServletRequest request) {
+        authorizationService.check(request);
+        return AuthorizationResponse.checked();
     }
 
 }

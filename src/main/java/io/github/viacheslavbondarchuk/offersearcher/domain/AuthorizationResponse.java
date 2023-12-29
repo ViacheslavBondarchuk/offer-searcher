@@ -9,13 +9,19 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @JsonInclude(value = NON_NULL)
 public final class AuthorizationResponse {
     private final String sessionToken;
+    private final Boolean success;
 
-    public AuthorizationResponse(String sessionToken) {
+    public AuthorizationResponse(String sessionToken, boolean success) {
         this.sessionToken = sessionToken;
+        this.success = success;
     }
 
-    public static AuthorizationResponse of(String sessionToken) {
-        return new AuthorizationResponse(sessionToken);
+    public static AuthorizationResponse success(String sessionToken) {
+        return new AuthorizationResponse(sessionToken, true);
+    }
+
+    public static AuthorizationResponse checked() {
+        return new AuthorizationResponse(null, true);
     }
 
 }
