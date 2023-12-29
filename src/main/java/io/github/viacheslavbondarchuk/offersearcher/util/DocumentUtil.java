@@ -14,6 +14,7 @@ import static io.github.viacheslavbondarchuk.offersearcher.service.AbstractDocum
 public final class DocumentUtil {
     public static final String HEADERS_KEY = "headers";
     public static final String TIMESTAMP_KEY = "timestamp";
+    public static final String TIMESTAMP_TYPE_KEY = "timestampType";
     public static final String PARTITION_KEY = "partition";
     public static final String SYSTEM_DATA_KEY = "systemData";
     public static final String OFFSET_KEY = "offset";
@@ -31,7 +32,8 @@ public final class DocumentUtil {
         Document document = record.value() == null ? new Document() : Document.parse(record.value());
         document.append(HEADERS_KEY, CommonUtil.convertHeadersToMap(record.headers()));
         document.append(SYSTEM_DATA_KEY, Map.of(
-                TIMESTAMP_KEY, System.nanoTime(),
+                TIMESTAMP_KEY, record.timestamp(),
+                TIMESTAMP_TYPE_KEY, record.timestampType(),
                 OFFSET_KEY, record.offset(),
                 PARTITION_KEY, record.partition(),
                 OPERATION_TYPE_KEY, record.value() == null ? REMOVE : UPDATE
