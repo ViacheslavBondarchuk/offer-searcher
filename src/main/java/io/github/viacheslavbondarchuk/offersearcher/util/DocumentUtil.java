@@ -20,7 +20,7 @@ public final class DocumentUtil {
     public static final String PARTITION_KEY = "partition";
     public static final String SYSTEM_KEY = "system";
     public static final String OFFSET_KEY = "offset";
-    public static final String OPERATION_TYPE_KEY = "operationType";
+    public static final String OPERATION_KEY = "operation";
 
     private DocumentUtil() {}
 
@@ -39,7 +39,7 @@ public final class DocumentUtil {
                 DATE_KEY, DateTimeUtil.format(record.timestamp(), DEFAULT),
                 OFFSET_KEY, record.offset(),
                 PARTITION_KEY, record.partition(),
-                OPERATION_TYPE_KEY, record.value() == null ? REMOVE : UPDATE
+                OPERATION_KEY, record.value() == null ? REMOVE : UPDATE
         ));
         Optional.ofNullable(id).ifPresent(i -> document.append(MONGO_ID_KEY, id));
         return document;
