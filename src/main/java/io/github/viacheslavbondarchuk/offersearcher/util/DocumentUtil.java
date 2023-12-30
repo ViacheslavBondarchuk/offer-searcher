@@ -10,7 +10,7 @@ import static io.github.viacheslavbondarchuk.offersearcher.domain.OperationType.
 import static io.github.viacheslavbondarchuk.offersearcher.domain.OperationType.UPDATE;
 import static io.github.viacheslavbondarchuk.offersearcher.service.AbstractDocumentStorage.ENTITY_ID_KEY;
 import static io.github.viacheslavbondarchuk.offersearcher.service.AbstractDocumentStorage.MONGO_ID_KEY;
-import static io.github.viacheslavbondarchuk.offersearcher.util.DateTimeUtil.DEFAULT;
+import static io.github.viacheslavbondarchuk.offersearcher.util.DateTimeUtil.ISO_DATE_TIME_WITH_MS;
 
 public final class DocumentUtil {
     public static final String HEADERS_KEY = "headers";
@@ -36,7 +36,7 @@ public final class DocumentUtil {
         document.append(SYSTEM_KEY, Map.of(
                 TIMESTAMP_KEY, record.timestamp(),
                 TIMESTAMP_TYPE_KEY, record.timestampType(),
-                DATE_KEY, DateTimeUtil.format(record.timestamp(), DEFAULT),
+                DATE_KEY, DateTimeUtil.format(record.timestamp(), ISO_DATE_TIME_WITH_MS),
                 OFFSET_KEY, record.offset(),
                 PARTITION_KEY, record.partition(),
                 OPERATION_KEY, record.value() == null ? REMOVE : UPDATE
