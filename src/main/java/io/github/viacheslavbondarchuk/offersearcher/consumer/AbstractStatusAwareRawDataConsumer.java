@@ -67,7 +67,7 @@ public abstract class AbstractStatusAwareRawDataConsumer implements RawDataKafka
     public void onRecords(List<ConsumerRecord<String, String>> records) {
         for (ConsumerRecord<String, String> record : records) {
             try {
-                log.debug("Processing kafka record. Key: {}, Value: {}", record.key(), record.value());
+                log.info("Processing kafka record. Key: {}, Value: {}", record.key(), record.value());
                 updateCurrentOffset(record.topic(), record.partition(), record.offset());
                 onRecord(record);
             } catch (Exception ex) {
