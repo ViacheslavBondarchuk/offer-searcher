@@ -4,7 +4,10 @@ services:
     image: portainer/portainer-ce:latest
     container_name: portainer
     restart: always
-    cpu_count: 1
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
     networks:
       infra_network:
     environment:
@@ -18,7 +21,10 @@ services:
     image: hashicorp/vault
     container_name: vault
     restart: always
-    cpu_count: 1
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
     networks:
       infra_network:
     ports:
@@ -35,7 +41,10 @@ services:
     image: bitnami/mongodb:7.0.4
     container_name: mongodb
     restart: always
-    cpu_count: 4
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
     networks:
       infra_network:
     volumes:
@@ -48,7 +57,10 @@ services:
     image: postgres:16.1-alpine3.19
     container_name: postgresql
     restart: always
-    cpu_count: 1
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
     networks:
       infra_network:
     volumes:
@@ -59,7 +71,10 @@ services:
     image: jetbrains/teamcity-server:2023.11.1-linux
     container_name: teamcity
     restart: always
-    cpu_count: 1
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
     networks:
       infra_network:
     volumes:
@@ -75,7 +90,10 @@ services:
     container_name: teamcity-agent
     restart: always
     user: root
-    cpu_count: 1
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
     networks:
       infra_network:
     volumes:
@@ -90,20 +108,14 @@ services:
       - SERVER_URL=http://teamcity:8111/teamcity
     links:
       - teamcity
-  hazelcast:
-    image: hazelcast/hazelcast:5
-    container_name: hazelcast
-    restart: always
-    cpu_count: 1
-    ports:
-      - "5701:5701"
-    networks:
-      infra_network:
   nginx:
     image: nginx:stable-alpine3.17
     container_name: nginx
     restart: always
-    cpu_count: 1
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
     networks:
       infra_network:
     volumes:
