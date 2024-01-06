@@ -8,10 +8,10 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import static io.github.viacheslavbondarchuk.offersearcher.domain.JKSFileType.OFFER_SEARCHER_KEYSTORE;
 import static io.github.viacheslavbondarchuk.offersearcher.domain.JKSFileType.OFFER_SEARCHER_TRUSTSTORE;
@@ -43,6 +43,10 @@ public final class KafkaProperties {
         this.securityProtocol = securityProtocol;
         this.sslProperties = sslProperties;
         this.topic = topic;
+    }
+
+    public <T> T map(Function<KafkaProperties, T> function) {
+        return function.apply(this);
     }
 
     @Getter

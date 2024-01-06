@@ -26,7 +26,6 @@ repositories {
 
 ext {
     set('springCloudVersion', "2023.0.0")
-    set('hazelcastVersion', "5.3.6")
     set('log4jVersion', "2.22.0")
     set('slf4jVersion', "2.0.9")
 }
@@ -38,7 +37,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-    implementation "com.hazelcast:hazelcast-spring:${hazelcastVersion}"
     implementation 'org.springframework.cloud:spring-cloud-starter-vault-config'
     implementation 'org.springframework.kafka:spring-kafka'
 

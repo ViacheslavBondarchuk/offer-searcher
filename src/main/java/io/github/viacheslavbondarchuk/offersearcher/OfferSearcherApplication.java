@@ -1,6 +1,5 @@
 package io.github.viacheslavbondarchuk.offersearcher;
 
-import io.github.viacheslavbondarchuk.offersearcher.properties.HazelcastProperties;
 import io.github.viacheslavbondarchuk.offersearcher.properties.KafkaProperties;
 import io.github.viacheslavbondarchuk.offersearcher.properties.MongoProperties;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties({
         KafkaProperties.class,
         MongoProperties.class,
-        HazelcastProperties.class
 })
 public class OfferSearcherApplication {
 

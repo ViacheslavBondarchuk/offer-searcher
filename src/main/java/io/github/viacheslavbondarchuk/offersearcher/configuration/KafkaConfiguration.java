@@ -11,9 +11,14 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.listener.KafkaListenerErrorHandler;
+
+import java.util.Map;
 
 /**
  * author: vbondarchuk
@@ -23,11 +28,15 @@ import org.springframework.kafka.listener.KafkaListenerErrorHandler;
 
 @Configuration
 public class KafkaConfiguration {
+    private final Map<String, Object> properties;
 
+    public KafkaConfiguration(KafkaProperties properties, JKSFileService jksFileService) {
+        this.properties = properties.load(jksFileService);
+    }
 
     @Bean
-    public ConsumerFactory<String, String> consumerFactory(KafkaProperties kafkaProperties, JKSFileService jksFileService) {
-        return new DefaultKafkaConsumerFactory<>(kafkaProperties.load(jksFileService));
+    public ConsumerFactory<String, String> consumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(properties);
     }
 
     @Bean
@@ -53,6 +62,16 @@ public class KafkaConfiguration {
             logger.error("Message: {}. Exception: ", message, exception);
             return null;
         };
+    }
+
+    @Bean
+    public ProducerFactory<String, String> producerFactory() {
+        return new DefaultKafkaProducerFactory<>(properties);
+    }
+
+    @Bean
+    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> factory) {
+        return new KafkaTemplate<>(factory, true);
     }
 
 }
