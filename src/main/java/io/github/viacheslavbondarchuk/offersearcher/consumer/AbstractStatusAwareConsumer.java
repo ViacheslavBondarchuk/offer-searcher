@@ -4,7 +4,6 @@ import io.github.viacheslavbondarchuk.offersearcher.domain.KafkaTopicPartitionSt
 import io.github.viacheslavbondarchuk.offersearcher.domain.KafkaTopicStatus;
 import io.github.viacheslavbondarchuk.offersearcher.service.StatusAwareService;
 import io.github.viacheslavbondarchuk.offersearcher.util.KeyValuePair;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
@@ -15,14 +14,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-@Slf4j
-public abstract class AbstractStatusAwareRawDataConsumer implements RawDataKafkaConsumer, StatusAwareService<KafkaTopicStatus> {
+public abstract class AbstractStatusAwareConsumer implements RawDataKafkaConsumer, StatusAwareService<KafkaTopicStatus> {
     protected final Map<TopicPartition, Long> topicMaxOffsetPair;
     protected final Map<TopicPartition, Long> topicCurrentOffsetPair;
     protected final Consumer<String, String> consumer;
     protected final String topic;
 
-    protected AbstractStatusAwareRawDataConsumer(Consumer<String, String> consumer, String topic) {
+    protected AbstractStatusAwareConsumer(Consumer<String, String> consumer, String topic) {
         this.consumer = consumer;
         this.topicMaxOffsetPair = new HashMap<>();
         this.topicCurrentOffsetPair = new HashMap<>();
@@ -66,13 +64,8 @@ public abstract class AbstractStatusAwareRawDataConsumer implements RawDataKafka
     @Override
     public void onRecords(List<ConsumerRecord<String, String>> records) {
         for (ConsumerRecord<String, String> record : records) {
-            try {
-                log.debug("Processing kafka record. Key: {}, Value: {}", record.key(), record.value());
-                updateCurrentOffset(record.topic(), record.partition(), record.offset());
-                onRecord(record);
-            } catch (Exception ex) {
-                log.error("Can not process kafka record: Key: {}, Value: {}. Exception: ", record.key(), record.value(), ex);
-            }
+            updateCurrentOffset(record.topic(), record.partition(), record.offset());
+            onRecord(record);
         }
     }
 }

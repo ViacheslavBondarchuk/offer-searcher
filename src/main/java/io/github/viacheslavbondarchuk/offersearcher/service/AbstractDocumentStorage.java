@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.util.Collection;
 import java.util.List;
 
 public abstract class AbstractDocumentStorage implements StatusAwareService<StorageStatus> {
@@ -33,6 +34,14 @@ public abstract class AbstractDocumentStorage implements StatusAwareService<Stor
     @Override
     public KeyValuePair<String, StorageStatus> getStatus() {
         return KeyValuePair.of(getServiceName(), StorageStatus.of(getCollectionName(), mongoTemplate.estimatedCount(getCollectionName())));
+    }
+
+    public void saveAll(Collection<Document> documents) {
+        try {
+            mongoTemplate.insert(documents, getCollectionName());
+        } catch (Exception ex) {
+            log.error("Can not save all into collection: {}, document: {}. Exception: ", getCollectionName(), documents, ex);
+        }
     }
 
     public void save(Document document) {

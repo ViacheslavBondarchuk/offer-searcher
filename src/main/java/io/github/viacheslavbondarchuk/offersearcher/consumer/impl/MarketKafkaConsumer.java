@@ -1,8 +1,7 @@
 package io.github.viacheslavbondarchuk.offersearcher.consumer.impl;
 
-import io.github.viacheslavbondarchuk.offersearcher.consumer.AbstractRecordKeepingConsumer;
-import io.github.viacheslavbondarchuk.offersearcher.service.MarketStorage;
-import io.github.viacheslavbondarchuk.offersearcher.service.MarketUpdateStorage;
+import io.github.viacheslavbondarchuk.offersearcher.consumer.AbstractStatusAwareConsumer;
+import io.github.viacheslavbondarchuk.offersearcher.processor.impl.MarketQueuedRecordProcessor;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,11 +11,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public final class MarketKafkaConsumer extends AbstractRecordKeepingConsumer {
-    public MarketKafkaConsumer(@Value("${com.gamesys.sportsbook.common.transport.kafka.topic.market}") String topic,
-                               Consumer<String, String> consumer, MarketStorage marketStorage, MarketUpdateStorage updateStorage) {
-        super(consumer, topic, updateStorage, marketStorage);
+public final class MarketKafkaConsumer extends AbstractStatusAwareConsumer {
+    private final MarketQueuedRecordProcessor processor;
 
+    public MarketKafkaConsumer(@Value("${com.gamesys.sportsbook.common.transport.kafka.topic.market}") String topic,
+                               Consumer<String, String> consumer, MarketQueuedRecordProcessor processor) {
+        super(consumer, topic);
+        this.processor = processor;
     }
 
     @Override
@@ -29,5 +30,10 @@ public final class MarketKafkaConsumer extends AbstractRecordKeepingConsumer {
             idIsGroup = false, containerFactory = "kafkaListenerContainerFactory", errorHandler = "kafkaListenerErrorHandler")
     public void onRecords(List<ConsumerRecord<String, String>> consumerRecords) {
         super.onRecords(consumerRecords);
+    }
+
+    @Override
+    public void onRecord(ConsumerRecord<String, String> record) {
+        processor.offer(record);
     }
 }

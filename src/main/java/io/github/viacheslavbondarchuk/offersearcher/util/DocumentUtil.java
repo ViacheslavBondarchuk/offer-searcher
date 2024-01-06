@@ -3,6 +3,7 @@ package io.github.viacheslavbondarchuk.offersearcher.util;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.bson.Document;
 
+import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Optional;
 
@@ -43,5 +44,9 @@ public final class DocumentUtil {
         ));
         Optional.ofNullable(id).ifPresent(i -> document.append(MONGO_ID_KEY, id));
         return document;
+    }
+
+    public static String offsetAndPartitionAsId(long offset, int partition) {
+        return MessageFormat.format("{0}-{1}", String.valueOf(offset), String.valueOf(partition));
     }
 }

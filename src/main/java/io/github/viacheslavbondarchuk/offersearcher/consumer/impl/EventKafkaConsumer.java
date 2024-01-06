@@ -1,8 +1,7 @@
 package io.github.viacheslavbondarchuk.offersearcher.consumer.impl;
 
-import io.github.viacheslavbondarchuk.offersearcher.consumer.AbstractRecordKeepingConsumer;
-import io.github.viacheslavbondarchuk.offersearcher.service.EventStorage;
-import io.github.viacheslavbondarchuk.offersearcher.service.EventUpdateStorage;
+import io.github.viacheslavbondarchuk.offersearcher.consumer.AbstractStatusAwareConsumer;
+import io.github.viacheslavbondarchuk.offersearcher.processor.impl.EventQueuedRecordProcessor;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,11 +11,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public final class EventKafkaConsumer extends AbstractRecordKeepingConsumer {
+public final class EventKafkaConsumer extends AbstractStatusAwareConsumer {
+    private final EventQueuedRecordProcessor processor;
 
     public EventKafkaConsumer(@Value("${com.gamesys.sportsbook.common.transport.kafka.topic.event}") String topic,
-                              Consumer<String, String> consumer, EventStorage eventStorage, EventUpdateStorage eventUpdatesStorage) {
-        super(consumer, topic, eventUpdatesStorage, eventStorage);
+                              Consumer<String, String> consumer, EventQueuedRecordProcessor processor) {
+        super(consumer, topic);
+        this.processor = processor;
     }
 
     @Override
@@ -29,6 +30,11 @@ public final class EventKafkaConsumer extends AbstractRecordKeepingConsumer {
             idIsGroup = false, containerFactory = "kafkaListenerContainerFactory", errorHandler = "kafkaListenerErrorHandler")
     public void onRecords(List<ConsumerRecord<String, String>> consumerRecords) {
         super.onRecords(consumerRecords);
+    }
+
+    @Override
+    public void onRecord(ConsumerRecord<String, String> record) {
+        processor.offer(record);
     }
 
 }
