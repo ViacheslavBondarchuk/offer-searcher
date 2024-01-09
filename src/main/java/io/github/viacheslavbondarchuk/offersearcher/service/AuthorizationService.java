@@ -3,7 +3,6 @@ package io.github.viacheslavbondarchuk.offersearcher.service;
 
 import io.github.viacheslavbondarchuk.offersearcher.exception.AuthorizationException;
 import io.github.viacheslavbondarchuk.offersearcher.util.Checking;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +22,10 @@ public class AuthorizationService {
         this.secretKey = secretKey;
     }
 
-    public void check(HttpServletRequest request) {
-        String headerValue = request.getHeader(SECRET_KEY);
-        Checking.check(headerValue, Objects::isNull,
+    public void check(String secretKey) {
+        Checking.check(secretKey, Objects::isNull,
                 () -> new AuthorizationException(MessageFormat.format(AUTHORIZATION_EXCEPTION_TEMPLATE, SECRET_KEY)));
-        Checking.check(headerValue, Predicate.not(secretKey::equals), () -> new AuthorizationException("Unauthorized"));
+        Checking.check(secretKey, Predicate.not(this.secretKey::equals), () -> new AuthorizationException("Unauthorized"));
     }
 
 }

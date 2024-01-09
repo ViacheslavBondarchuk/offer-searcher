@@ -2,6 +2,7 @@ package io.github.viacheslavbondarchuk.offersearcher.configuration;
 
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -31,6 +32,7 @@ public class WebConfiguration implements WebMvcConfigurer {
                 .serializationInclusion(NON_NULL)
                 .visibility(ALL, ANY)
                 .modulesToInstall(new ParameterNamesModule());
+        converters.add(new ByteArrayHttpMessageConverter());
         converters.add(new MappingJackson2HttpMessageConverter(builder.build()));
     }
 }
