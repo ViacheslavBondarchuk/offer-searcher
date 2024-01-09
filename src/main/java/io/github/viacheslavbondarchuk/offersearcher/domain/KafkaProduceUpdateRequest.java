@@ -3,6 +3,7 @@ package io.github.viacheslavbondarchuk.offersearcher.domain;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.bson.Document;
 
@@ -22,7 +23,7 @@ public final class KafkaProduceUpdateRequest extends AbstractRequest {
     @NotEmpty
     private final String key;
     private final Document value;
-    @NotEmpty
+    @NotNull
     private final Map<String, String> headers;
 
     @JsonCreator(mode = PROPERTIES)
