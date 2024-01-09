@@ -3,6 +3,9 @@ package io.github.viacheslavbondarchuk.offersearcher.consumer;
 import io.github.viacheslavbondarchuk.offersearcher.domain.KafkaTopicPartitionStatus;
 import io.github.viacheslavbondarchuk.offersearcher.domain.KafkaTopicStatus;
 import io.github.viacheslavbondarchuk.offersearcher.service.StatusAwareService;
+import io.github.viacheslavbondarchuk.offersearcher.storage.AbstractDocumentStorage;
+import io.github.viacheslavbondarchuk.offersearcher.util.CommonUtil;
+import io.github.viacheslavbondarchuk.offersearcher.util.DocumentUtil;
 import io.github.viacheslavbondarchuk.offersearcher.util.KeyValuePair;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -14,17 +17,23 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public abstract class AbstractStatusAwareConsumer implements RawDataKafkaConsumer, StatusAwareService<KafkaTopicStatus> {
+public abstract class AbstractKeepingRecordConsumer implements RawDataKafkaConsumer, StatusAwareService<KafkaTopicStatus> {
     protected final Map<TopicPartition, Long> topicMaxOffsetPair;
     protected final Map<TopicPartition, Long> topicCurrentOffsetPair;
     protected final Consumer<String, String> consumer;
     protected final String topic;
 
-    protected AbstractStatusAwareConsumer(Consumer<String, String> consumer, String topic) {
+    private final AbstractDocumentStorage storage;
+    private final AbstractDocumentStorage updateHistoryStorage;
+
+    protected AbstractKeepingRecordConsumer(AbstractDocumentStorage storage, AbstractDocumentStorage updateHistoryStorage,
+                                            Consumer<String, String> consumer, String topic) {
         this.consumer = consumer;
+        this.updateHistoryStorage = updateHistoryStorage;
         this.topicMaxOffsetPair = new HashMap<>();
         this.topicCurrentOffsetPair = new HashMap<>();
         this.topic = topic;
+        this.storage = storage;
         this.init();
     }
 
@@ -63,9 +72,17 @@ public abstract class AbstractStatusAwareConsumer implements RawDataKafkaConsume
 
     @Override
     public void onRecords(List<ConsumerRecord<String, String>> records) {
-        for (ConsumerRecord<String, String> record : records) {
-            updateCurrentOffset(record.topic(), record.partition(), record.offset());
-            onRecord(record);
-        }
+        CommonUtil.executeByPredicate(!records.isEmpty(), () -> {
+            updateHistoryStorage.saveAll(records.stream()
+                    .peek(record -> updateCurrentOffset(record.topic(), record.partition(), record.offset()))
+                    .map(record -> DocumentUtil.fromRecord(
+                            DocumentUtil.offsetAndPartitionAsId(record.offset(), record.partition()), record))
+                    .toList());
+            records.forEach(record -> CommonUtil.acceptByPredicate(
+                    record.value(), Objects::nonNull,
+                    value -> storage.save(DocumentUtil.fromRecordWithoutEntityId(record.key(), record)),
+                    () -> storage.remove(record.key())
+            ));
+        });
     }
 }

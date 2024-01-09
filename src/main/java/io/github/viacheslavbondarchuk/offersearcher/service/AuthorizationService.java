@@ -19,7 +19,6 @@ public class AuthorizationService {
 
     private final String secretKey;
 
-
     public AuthorizationService(@Value("${authorization.secret-key}") String secretKey) {
         this.secretKey = secretKey;
     }

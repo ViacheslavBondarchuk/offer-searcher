@@ -1,12 +1,5 @@
 package io.github.viacheslavbondarchuk.offersearcher.util;
 
-import org.apache.kafka.common.header.Header;
-import org.apache.kafka.common.header.Headers;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -18,12 +11,6 @@ import java.util.function.Supplier;
  * time: 10:14 PM
  **/
 public final class CommonUtil {
-    private static final Set<String> excludedHeaders = new HashSet<>();
-
-    static {
-        excludedHeaders.add("__TypeId__");
-    }
-
     private CommonUtil() {}
 
     public static <T> void acceptIfNonNull(T value, Consumer<T> consumer) {
@@ -60,22 +47,17 @@ public final class CommonUtil {
         acceptByPredicate(value, predicate, consumer, null);
     }
 
+    public static void executeByPredicate(boolean condition, Runnable runnable) {
+        if (condition) {
+            runnable.run();
+        }
+    }
+
     @SafeVarargs
     public static <T> void arrayForEach(Consumer<T> consumer, T... values) {
         for (T value : values) {
             consumer.accept(value);
         }
     }
-
-    public static Map<String, String> convertHeadersToMap(Headers headers) {
-        Map<String, String> map = new HashMap<>();
-        for (Header header : headers) {
-            if (header.value() != null && !excludedHeaders.contains(header.key())) {
-                map.put(header.key(), new String(header.value()));
-            }
-        }
-        return map;
-    }
-
 
 }

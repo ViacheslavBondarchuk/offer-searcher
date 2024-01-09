@@ -1,7 +1,10 @@
 package io.github.viacheslavbondarchuk.offersearcher.util;
 
 import io.github.viacheslavbondarchuk.offersearcher.domain.SearchRequest;
+import org.bson.Document;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.BasicQuery;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 public final class QueryUtil {

@@ -4,8 +4,8 @@ import io.github.viacheslavbondarchuk.offersearcher.service.JKSFileService;
 import io.github.viacheslavbondarchuk.offersearcher.util.CommonUtil;
 import lombok.Getter;
 import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
 
@@ -15,6 +15,19 @@ import java.util.function.Function;
 
 import static io.github.viacheslavbondarchuk.offersearcher.domain.JKSFileType.OFFER_SEARCHER_KEYSTORE;
 import static io.github.viacheslavbondarchuk.offersearcher.domain.JKSFileType.OFFER_SEARCHER_TRUSTSTORE;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ALLOW_AUTO_CREATE_TOPICS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.common.config.SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG;
 import static org.apache.kafka.common.config.SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG;
 import static org.apache.kafka.common.config.SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG;
@@ -102,17 +115,19 @@ public final class KafkaProperties {
 
     public Map<String, Object> load(JKSFileService jksFileService) {
         Map<String, Object> proerties = new HashMap<>();
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 500);
-        proerties.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, CommonUtil.groupIdWithTimestamp("offer-searcher"));
-        proerties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 500);
-        proerties.put(ConsumerConfig.ALLOW_AUTO_CREATE_TOPICS_CONFIG, false);
-        proerties.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, 5000);
+        proerties.put(BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        proerties.put(ENABLE_AUTO_COMMIT_CONFIG, true);
+        proerties.put(KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        proerties.put(VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        proerties.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        proerties.put(VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        proerties.put(AUTO_OFFSET_RESET_CONFIG, "earliest");
+        proerties.put(MAX_POLL_RECORDS_CONFIG, 500);
+        proerties.put(FETCH_MAX_WAIT_MS_CONFIG, 500);
+        proerties.put(GROUP_ID_CONFIG, CommonUtil.groupIdWithTimestamp("offer-searcher"));
+        proerties.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, 500);
+        proerties.put(ALLOW_AUTO_CREATE_TOPICS_CONFIG, false);
+        proerties.put(REQUEST_TIMEOUT_MS_CONFIG, 5000);
 
         if (SSL_PROTOCOL.equals(securityProtocol)) {
             proerties.put(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, securityProtocol);

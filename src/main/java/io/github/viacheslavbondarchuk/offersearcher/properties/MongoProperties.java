@@ -32,19 +32,22 @@ public final class MongoProperties {
     @Getter
     public static class Collection {
         private final String event;
-        private final String market;
-        private final String selection;
         private final String eventUpdates;
+        private final String market;
         private final String marketUpdates;
+        private final String selection;
         private final String selectionUpdates;
 
+
         @ConstructorBinding
-        public Collection(String event, String market, String selection, String eventUpdates, String marketUpdates, String selectionUpdates) {
+        public Collection(String event, String eventUpdates,
+                          String market, String marketUpdates,
+                          String selection, String selectionUpdates) {
             this.event = event;
-            this.market = market;
-            this.selection = selection;
             this.eventUpdates = eventUpdates;
+            this.market = market;
             this.marketUpdates = marketUpdates;
+            this.selection = selection;
             this.selectionUpdates = selectionUpdates;
         }
     }

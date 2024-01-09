@@ -8,8 +8,6 @@ public interface RawDataKafkaConsumer {
 
     void onRecords(List<ConsumerRecord<String, String>> records);
 
-    void onRecord(ConsumerRecord<String, String> record);
-
     boolean isReady();
 
 }

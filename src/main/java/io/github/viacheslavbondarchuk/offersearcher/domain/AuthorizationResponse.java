@@ -3,6 +3,8 @@ package io.github.viacheslavbondarchuk.offersearcher.domain;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 
+import java.util.Arrays;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @Getter

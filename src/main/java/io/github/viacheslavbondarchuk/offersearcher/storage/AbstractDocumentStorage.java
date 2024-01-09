@@ -1,6 +1,7 @@
-package io.github.viacheslavbondarchuk.offersearcher.service;
+package io.github.viacheslavbondarchuk.offersearcher.storage;
 
 import io.github.viacheslavbondarchuk.offersearcher.domain.StorageStatus;
+import io.github.viacheslavbondarchuk.offersearcher.service.StatusAwareService;
 import io.github.viacheslavbondarchuk.offersearcher.util.KeyValuePair;
 import org.bson.Document;
 import org.slf4j.Logger;

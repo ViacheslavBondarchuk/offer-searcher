@@ -9,35 +9,41 @@ import io.github.viacheslavbondarchuk.offersearcher.util.Checking;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
-import org.springframework.util.MimeTypeUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("search")
+@RequestMapping("/search")
 public class SearchController implements WebController {
+    public static final Supplier<RuntimeException> BOUNDARY_EXCEPTION_FACTORY =
+            () -> new BoundaryLimitException("Boundary limit exceeded. Boundary allowable limit is 100");
+    public static final Predicate<Integer> BOUNDARY_LIMIT_PREDICATE = limit -> limit > 100;
+
     private final SearchService searchService;
     private final AuthorizationService authorizationService;
 
-    @PostMapping(consumes = MimeTypeUtils.APPLICATION_JSON_VALUE, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-    public SearchResponse<List<Document>> search(@RequestBody SearchRequest searchRequest, HttpServletRequest request) {
+    @PostMapping(path = "/actual", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    public SearchResponse<List<Document>> search(@Validated @RequestBody SearchRequest searchRequest, HttpServletRequest request) {
         authorizationService.check(request);
-        Checking.check(searchRequest.getLimit(), limit -> limit > 100,
-                () -> new BoundaryLimitException("Boundary limit exceeded. Boundary allowable limit is 100"));
+        Checking.check(searchRequest.getLimit(), BOUNDARY_LIMIT_PREDICATE, BOUNDARY_EXCEPTION_FACTORY);
         return searchService.search(searchRequest);
     }
 
-    @PostMapping(path = "/updates", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-    public SearchResponse<List<Document>> searchUpdates(@RequestBody SearchRequest searchRequest, HttpServletRequest request) {
+    @PostMapping(path = "/updates", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    public SearchResponse<List<Document>> searchInUpdateHistory(@Validated @RequestBody SearchRequest searchRequest, HttpServletRequest request) {
         authorizationService.check(request);
-        Checking.check(searchRequest.getLimit(), limit -> limit > 100,
-                () -> new BoundaryLimitException("Boundary limit exceeded. Boundary allowable limit is 100"));
-        return searchService.searchUpdates(searchRequest);
+        Checking.check(searchRequest.getLimit(), BOUNDARY_LIMIT_PREDICATE, BOUNDARY_EXCEPTION_FACTORY);
+        return searchService.searchInUpdateHistory(searchRequest);
     }
 
 }

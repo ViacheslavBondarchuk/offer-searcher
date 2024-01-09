@@ -9,8 +9,8 @@ import java.util.Optional;
 
 import static io.github.viacheslavbondarchuk.offersearcher.domain.OperationType.REMOVE;
 import static io.github.viacheslavbondarchuk.offersearcher.domain.OperationType.UPDATE;
-import static io.github.viacheslavbondarchuk.offersearcher.service.AbstractDocumentStorage.ENTITY_ID_KEY;
-import static io.github.viacheslavbondarchuk.offersearcher.service.AbstractDocumentStorage.MONGO_ID_KEY;
+import static io.github.viacheslavbondarchuk.offersearcher.storage.AbstractDocumentStorage.ENTITY_ID_KEY;
+import static io.github.viacheslavbondarchuk.offersearcher.storage.AbstractDocumentStorage.MONGO_ID_KEY;
 import static io.github.viacheslavbondarchuk.offersearcher.util.DateTimeUtil.ISO_DATE_TIME;
 
 public final class DocumentUtil {
@@ -33,7 +33,7 @@ public final class DocumentUtil {
 
     public static Document fromRecord(String id, ConsumerRecord<String, String> record) {
         Document document = record.value() == null ? new Document() : Document.parse(record.value());
-        document.append(HEADERS_KEY, CommonUtil.convertHeadersToMap(record.headers()));
+        document.append(HEADERS_KEY, KafkaUtil.headersToMap(record.headers()));
         document.append(SYSTEM_KEY, Map.of(
                 TIMESTAMP_KEY, record.timestamp(),
                 TIMESTAMP_TYPE_KEY, record.timestampType(),
